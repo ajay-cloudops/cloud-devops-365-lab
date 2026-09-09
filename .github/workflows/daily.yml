@@ -1,4 +1,4 @@
-name: Daily Contribution
+name: Daily Cloud & DevOps Topic
 
 on:
   schedule:
@@ -16,14 +16,96 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Add daily activity
+      - name: Generate daily Cloud and DevOps note
+        shell: bash
         run: |
-          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Daily Cloud & DevOps learning activity" >> activity.log
+          DATE=$(date -u '+%Y-%m-%d')
+          DAY=$(date -u '+%j')
 
-      - name: Commit changes
+          TOPICS=(
+            "Linux Fundamentals"
+            "Git Version Control"
+            "Docker Containers"
+            "AWS IAM"
+            "AWS EC2"
+            "AWS S3"
+            "CI/CD Pipelines"
+            "GitHub Actions"
+            "Kubernetes Pods"
+            "Kubernetes Services"
+            "Networking and DNS"
+            "Terraform Basics"
+            "Monitoring and Logging"
+            "DevOps Security"
+          )
+
+          DESCRIPTIONS=(
+            "Linux commands and file-system navigation are core skills for cloud servers."
+            "Git tracks source-code history and supports collaboration with branches and commits."
+            "Docker packages applications and dependencies into portable containers."
+            "AWS IAM controls users roles permissions and secure access."
+            "Amazon EC2 provides virtual machines for running cloud applications."
+            "Amazon S3 provides object storage for files backups logs and static content."
+            "CI/CD automates building testing and deploying software."
+            "GitHub Actions runs automated workflows inside GitHub repositories."
+            "A Kubernetes Pod is the smallest deployable unit in Kubernetes."
+            "Kubernetes Services provide stable networking to groups of Pods."
+            "Networking and DNS help systems communicate and resolve domain names."
+            "Terraform manages infrastructure using Infrastructure as Code."
+            "Monitoring and logging help track performance health and failures."
+            "DevOps Security integrates security into development and deployment."
+          )
+
+          COMMANDS=(
+            "pwd && ls -la"
+            "git status && git log --oneline -5"
+            "docker ps"
+            "aws iam get-user"
+            "aws ec2 describe-instances --max-items 5"
+            "aws s3 ls"
+            "git log --oneline --graph -5"
+            "gh workflow list"
+            "kubectl get pods -A"
+            "kubectl get svc -A"
+            "nslookup github.com"
+            "terraform plan"
+            "uptime"
+            "git status --short"
+          )
+
+          INDEX=$(( (10#$DAY - 1) % ${#TOPICS[@]} ))
+
+          TOPIC="${TOPICS[$INDEX]}"
+          DESCRIPTION="${DESCRIPTIONS[$INDEX]}"
+          COMMAND="${COMMANDS[$INDEX]}"
+
+          mkdir -p notes
+
+          cat > "notes/${DATE}.md" <<EON
+          # ${DATE} — ${TOPIC}
+
+          ## Topic
+          ${TOPIC}
+
+          ## Why it matters
+          ${DESCRIPTION}
+
+          ## Command to explore
+
+          \`\`\`bash
+          ${COMMAND}
+          \`\`\`
+
+          ## Daily focus
+          Review this concept and understand how it fits into a real Cloud/DevOps workflow.
+          EON
+
+          echo "${DATE} - ${TOPIC}" >> activity.log
+
+      - name: Commit daily note
         run: |
           git config user.name "Ajay Kumar"
           git config user.email "255509140+ajay-cloudops@users.noreply.github.com"
-          git add activity.log
-          git commit -m "Daily Cloud and DevOps activity $(date -u '+%Y-%m-%d')" || exit 0
+          git add activity.log notes/
+          git commit -m "Daily Cloud and DevOps topic $(date -u '+%Y-%m-%d')" || exit 0
           git push
