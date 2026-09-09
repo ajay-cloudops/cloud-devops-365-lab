@@ -1,0 +1,29 @@
+name: Daily Contribution
+
+on:
+  schedule:
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  daily-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Add daily activity
+        run: |
+          echo "$(date -u '+%Y-%m-%d %H:%M:%S UTC') - Daily Cloud & DevOps learning activity" >> activity.log
+
+      - name: Commit changes
+        run: |
+          git config user.name "Ajay Kumar"
+          git config user.email "255509140+ajay-cloudops@users.noreply.github.com"
+          git add activity.log
+          git commit -m "Daily Cloud and DevOps activity $(date -u '+%Y-%m-%d')" || exit 0
+          git push
