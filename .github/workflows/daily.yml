@@ -1,4 +1,4 @@
-name: Daily Cloud & DevOps Topic
+name: Daily Cloud DevOps Learning
 
 on:
   schedule:
@@ -9,103 +9,101 @@ permissions:
   contents: write
 
 jobs:
-  daily-commit:
+  daily-learning:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate daily Cloud and DevOps note
+      - name: Create 12 meaningful daily commits
         shell: bash
         run: |
+          git config user.name "Ajay Kumar"
+          git config user.email "255509140+ajay-cloudops@users.noreply.github.com"
+
           DATE=$(date -u '+%Y-%m-%d')
           DAY=$(date -u '+%j')
 
           TOPICS=(
-            "Linux Fundamentals"
-            "Git Version Control"
+            "Linux File Permissions"
+            "Linux Processes"
+            "Linux Networking"
+            "SSH Basics"
+            "Git Status"
+            "Git Branching"
+            "Git Merge"
+            "Git Rebase"
+            "Docker Images"
             "Docker Containers"
+            "Docker Volumes"
+            "Docker Networks"
             "AWS IAM"
             "AWS EC2"
             "AWS S3"
-            "CI/CD Pipelines"
+            "AWS VPC"
+            "AWS Lambda"
+            "AWS CloudWatch"
+            "AWS CloudFront"
+            "AWS Security Groups"
+            "CI CD Basics"
             "GitHub Actions"
+            "Pipeline Testing"
+            "Deployment Automation"
             "Kubernetes Pods"
+            "Kubernetes Deployments"
             "Kubernetes Services"
-            "Networking and DNS"
-            "Terraform Basics"
-            "Monitoring and Logging"
+            "Kubernetes ConfigMaps"
+            "Kubernetes Secrets"
+            "Kubernetes Ingress"
+            "Terraform Providers"
+            "Terraform Resources"
+            "Terraform State"
+            "Infrastructure as Code"
+            "DNS Basics"
+            "HTTP and HTTPS"
+            "Load Balancing"
+            "Reverse Proxy"
+            "Monitoring"
+            "Logging"
             "DevOps Security"
+            "Secrets Management"
+            "Blue Green Deployment"
+            "Rolling Deployment"
+            "Zero Downtime Deployment"
+            "Health Checks"
+            "Auto Scaling"
+            "Cloud Architecture"
           )
 
-          DESCRIPTIONS=(
-            "Linux commands and file-system navigation are core skills for cloud servers."
-            "Git tracks source-code history and supports collaboration with branches and commits."
-            "Docker packages applications and dependencies into portable containers."
-            "AWS IAM controls users roles permissions and secure access."
-            "Amazon EC2 provides virtual machines for running cloud applications."
-            "Amazon S3 provides object storage for files backups logs and static content."
-            "CI/CD automates building testing and deploying software."
-            "GitHub Actions runs automated workflows inside GitHub repositories."
-            "A Kubernetes Pod is the smallest deployable unit in Kubernetes."
-            "Kubernetes Services provide stable networking to groups of Pods."
-            "Networking and DNS help systems communicate and resolve domain names."
-            "Terraform manages infrastructure using Infrastructure as Code."
-            "Monitoring and logging help track performance health and failures."
-            "DevOps Security integrates security into development and deployment."
-          )
+          mkdir -p daily
+          FILE="daily/${DATE}.md"
 
-          COMMANDS=(
-            "pwd && ls -la"
-            "git status && git log --oneline -5"
-            "docker ps"
-            "aws iam get-user"
-            "aws ec2 describe-instances --max-items 5"
-            "aws s3 ls"
-            "git log --oneline --graph -5"
-            "gh workflow list"
-            "kubectl get pods -A"
-            "kubectl get svc -A"
-            "nslookup github.com"
-            "terraform plan"
-            "uptime"
-            "git status --short"
-          )
+          echo "# Cloud and DevOps Learning - ${DATE}" > "$FILE"
+          echo "" >> "$FILE"
 
-          INDEX=$(( (10#$DAY - 1) % ${#TOPICS[@]} ))
+          TOTAL=${#TOPICS[@]}
+          START=$(( (10#$DAY * 12) % TOTAL ))
 
-          TOPIC="${TOPICS[$INDEX]}"
-          DESCRIPTION="${DESCRIPTIONS[$INDEX]}"
-          COMMAND="${COMMANDS[$INDEX]}"
+          for i in $(seq 0 11); do
+            INDEX=$(( (START + i) % TOTAL ))
+            TOPIC="${TOPICS[$INDEX]}"
+            NUMBER=$((i + 1))
 
-          mkdir -p notes
+            {
+              echo "## Micro Topic ${NUMBER}: ${TOPIC}"
+              echo ""
+              echo "- Reviewed: ${TOPIC}"
+              echo "- Goal: Understand how ${TOPIC} is used in real Cloud and DevOps workflows."
+              echo ""
+            } >> "$FILE"
 
-          cat > "notes/${DATE}.md" <<EON
-          # ${DATE} — ${TOPIC}
+            git add "$FILE"
+            git commit -m "Cloud DevOps ${DATE} topic ${NUMBER}: ${TOPIC}"
+          done
 
-          ## Topic
-          ${TOPIC}
+          echo "${DATE} - Completed 12 Cloud and DevOps micro topics" >> activity.log
+          git add activity.log
+          git commit --amend --no-edit
 
-          ## Why it matters
-          ${DESCRIPTION}
-
-          ## Command to explore
-
-          \`\`\`bash
-          ${COMMAND}
-          \`\`\`
-
-          ## Daily focus
-          Review this concept and understand how it fits into a real Cloud/DevOps workflow.
-          EON
-
-          echo "${DATE} - ${TOPIC}" >> activity.log
-
-      - name: Commit daily note
-        run: |
-          git config user.name "Ajay Kumar"
-          git config user.email "255509140+ajay-cloudops@users.noreply.github.com"
-          git add activity.log notes/
-          git commit -m "Daily Cloud and DevOps topic $(date -u '+%Y-%m-%d')" || exit 0
           git push
