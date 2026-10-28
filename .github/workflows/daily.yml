@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create 12 meaningful daily commits
+      - name: Create 2 to 12 random daily commits
         shell: bash
         run: |
           git config user.name "Ajay Kumar"
@@ -85,7 +85,10 @@ jobs:
           TOTAL=${#TOPICS[@]}
           START=$(( (10#$DAY * 12) % TOTAL ))
 
-          for i in $(seq 0 11); do
+          COUNT=$((RANDOM % 11 + 2))
+          echo "Today's commit count: $COUNT"
+
+          for i in $(seq 0 $((COUNT - 1))); do
             INDEX=$(( (START + i) % TOTAL ))
             TOPIC="${TOPICS[$INDEX]}"
             NUMBER=$((i + 1))
