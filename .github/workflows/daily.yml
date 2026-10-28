@@ -76,23 +76,30 @@ jobs:
             "Cloud Architecture"
           )
 
+          set -e
+          git config user.name "Ajay Kumar"
+          git config user.email "255509140+ajay-cloudops@users.noreply.github.com"
+
+          DATE=$(date -u '+%Y-%m-%d')
+          DAY=$(date -u '+%j')
+          TOTAL=${#TOPICS[@]}
+
           mkdir -p daily
           FILE="daily/${DATE}.md"
 
-          echo "# Cloud and DevOps Learning - ${DATE}" > "$FILE"
-          echo "" >> "$FILE"
-
-          TOTAL=${#TOPICS[@]}
-          START=$(( (10#$DAY * 12) % TOTAL ))
-
+          # Repeated runs on the same day append new topics safely.
+          touch "$FILE"
+          EXISTING=$(grep -c '^## Micro Topic ' "$FILE" || true)
           COUNT=$((RANDOM % 11 + 2))
-          echo "Today's commit count: $COUNT"
+          START=$(( (10#$DAY * 12 + EXISTING) % TOTAL ))
+
+          echo "Today's new topic count: $COUNT"
+          echo "Existing topics today: $EXISTING"
 
           for i in $(seq 0 $((COUNT - 1))); do
             INDEX=$(( (START + i) % TOTAL ))
             TOPIC="${TOPICS[$INDEX]}"
-            NUMBER=$((i + 1))
-
+            NUMBER=$((EXISTING + i + 1))
             {
               echo "## Micro Topic ${NUMBER}: ${TOPIC}"
               echo ""
@@ -105,8 +112,9 @@ jobs:
             git commit -m "Cloud DevOps ${DATE} topic ${NUMBER}: ${TOPIC}"
           done
 
-          echo "${DATE} - Completed 12 Cloud and DevOps micro topics" >> activity.log
+          echo "${DATE} - Added ${COUNT} topics (total today: $((EXISTING + COUNT)))" >> activity.log
           git add activity.log
-          git commit --amend --no-edit
-
+          if ! git diff --cached --quiet; then
+            git commit --amend --no-edit
+          fi
           git push
